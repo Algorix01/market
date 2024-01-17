@@ -1,10 +1,11 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import Brand from '../../components/Brand';
 import Leftnav from '../../components/Leftnav';
-import SubOfferings from '../../components/SubOfferings';
 import { Layout } from '@/components/Layout';
 import Card from '@/components/Card';
+import { appConfig } from '@/config';
+
+//const Card = dynamic(() => import('@/components/Card'), { ssr: false });
 
 const Actions: React.FC = () => {
   
@@ -17,7 +18,7 @@ const Actions: React.FC = () => {
       <div className="flex">
         <Leftnav />
         <div className="flex justify-center items-center p-16 mx-auto">
-          <Card />
+          <Card config={ appConfig } />
         </div>
       </div>
     </Layout>

@@ -10,9 +10,9 @@ const Offerings: React.FC = () => {
   
   const subOfferings = [
     {
-      title: 'Additional Offering 1',
+      title: 'Publish AI',
       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.',
-      name: 'additional-offering-1'
+      name: 'publish-ai'
     },
     {
       title: 'Additional Offering 2',

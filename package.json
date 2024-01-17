@@ -9,6 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@metamask/providers": "^14.0.2",
+    "@nevermined-io/catalog": "^1.12.2",
+    "@nevermined-io/catalog-providers": "^1.0.0-rc9",
+    "@nevermined-io/providers": "^1.12.2",
+    "@nevermined-io/styles": "^0.1.9",
+    "ethers": "5.4",
     "next": "14.0.3",
     "react": "^18",
     "react-dom": "^18",

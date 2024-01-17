@@ -11,8 +11,8 @@ interface SubOfferingsProps {
 }
 
 const handleClick = (name: string) => {
-    router.push(`/actions/${name}`)
-  }
+  router.push(`/actions/${name}`)
+}
 
 const SubOfferings: React.FC<SubOfferingsProps> = ({ offerings }) => {
   return (
@@ -25,8 +25,7 @@ const SubOfferings: React.FC<SubOfferingsProps> = ({ offerings }) => {
                     <h3 className="text-md font-semibold mb-4">{offering.title}</h3>
                     <p className="text-sm">{offering.description}</p>
                 </div>
-            </Link>
-        
+            </Link>        
         ))}
       </div>
     </div>

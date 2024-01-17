@@ -6,9 +6,6 @@ import Link from 'next/link';
 import Brand from '../components/Brand'
 import { Layout } from '@/components/Layout';
 
-
-
-
 const Home: React.FC = () => { 
   
   const offerings = [
@@ -56,21 +53,19 @@ const Home: React.FC = () => {
   }
 
   return (
-    <Layout>
-      
-      
-      <main className="flex flex-grow justify-center items-center p-16 mx-auto">
-        <div className="p-4 grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-          {offerings.map((offering) => (
-            <Link href={`/offerings/${offering.id}`} key={offering.id} onClick={() => handleClick(offering.id)}>
-              <Offering title={offering.title} icon={offering.icon} description={offering.description} id={offering.id} />
-            </Link>
-          ))}
-        </div>
-      </main>
-
     
-    </Layout>
+      <Layout>
+        <main className="flex flex-grow justify-center items-center p-16 mx-auto">
+          <div className="p-4 grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+            {offerings.map((offering) => (
+              <Link href={`/offerings/${offering.id}`} key={offering.id} onClick={() => handleClick(offering.id)}>
+                <Offering title={offering.title} icon={offering.icon} description={offering.description} id={offering.id} />
+              </Link>
+            ))}
+          </div>
+        </main>
+      </Layout>
+    
     
   )
 }
