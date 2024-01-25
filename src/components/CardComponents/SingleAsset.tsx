@@ -1,4 +1,4 @@
-import { DDO } from "@nevermined-io/catalog"
+import { DDO } from "@nevermined-io/sdk"
 import { UiLayout, UiText } from "@nevermined-io/styles"
 
 const SingleAsset = ({ ddo }: { ddo: DDO }) => {

@@ -1,8 +1,12 @@
-import { Account, AssetPrice, DDO, MetaData, NFTAttributes, Nevermined, NeverminedOptions, RoyaltyAttributes, RoyaltyKind, getRoyaltyScheme } from "@nevermined-io/catalog"
+import { Account, AssetPrice, DDO, MetaData, NFTAttributes, Nevermined, NeverminedOptions, RoyaltyAttributes, RoyaltyKind, getRoyaltyScheme } from "@nevermined-io/sdk"
 import { UiLayout, UiText } from "@nevermined-io/styles"
 import { BigNumber, ethers } from "ethers"
 import { useEffect, useState } from "react"
 import PublishAsset from "./PublishAsset"
+import { Connector, useAccount, useConnect, useDisconnect } from 'wagmi'
+import { InjectedConnector } from 'wagmi/connectors/injected'
+import { useNevermined } from "@/context/nvm-sdk-context"
+import { useSdkReadiness } from "@/hooks/sdkReadiness"
 
 const ERC_TOKEN = '0xe11a86849d99f524cac3e7a0ec1241828e332c62'
 
@@ -10,9 +14,18 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
     const [walletAddress, setWalletAddress] = useState('')
     const [account, setAccount] = useState<Account>(undefined as unknown as Account)
     const [ddo, setDDO] = useState<DDO>({} as DDO)
-    const [sdk, setSdk] = useState<Nevermined>({} as Nevermined)
+    //const [sdk, setSdk] = useState<Nevermined>({} as Nevermined)
 
-    const loginMetamask = async () => {
+    const { address, isConnected } = useAccount()
+    const { connect } = useConnect({
+        connector: new InjectedConnector(),
+      })
+    const { disconnect } = useDisconnect()
+    const { sdk, isLoadingSDK } = useNevermined()
+    //const { isSdkReady} = useSdkReadiness()
+
+
+    /*const loginMetamask = async () => {
         try {            
             const response = await (window as any)?.ethereum?.request?.({
                 method: 'eth_requestAccounts',
@@ -23,9 +36,9 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
         } catch (error) {
             console.error('Error connecting to Metamask:', error);
         }        
-    }
+    }*/
 
-    useEffect(() => {    
+    /*useEffect(() => {    
         ;(window as any)?.ethereum?.on('accountsChanged', (newAccount: string[]) => {
           if (newAccount && newAccount.length > 0) {
             setWalletAddress(ethers.utils.getAddress(newAccount[0]))
@@ -40,9 +53,9 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
           const accounts = await provider.listAccounts()
           setWalletAddress(accounts?.length ? ethers.utils.getAddress(accounts[0]) : '')
         })()
-    }, [])
+    }, [])*/
 
-    useEffect(() => {
+    /*useEffect(() => {
         if (walletAddress) {
           ;(async () => {
             try {
@@ -56,25 +69,25 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
             }
           })()
         }
-    }, [walletAddress])
+    }, [walletAddress])*/
 
     const publishNFT1155 = async (
         nodeAddress: string,
         accountWallet: Account,
         metadata: MetaData,
         //royaltyAttributes: RoyaltyAttributes,
-        assetPrice: AssetPrice,
+        //assetPrice: AssetPrice,
     ) => {
         const nftAttributes = NFTAttributes.getNFT1155Instance({
           metadata,
-          serviceTypes: ['nft-sales', 'nft-access'],
-          amount: BigNumber.from(1),
-          cap: BigNumber.from(100),
+          //serviceTypes: ['nft-sales', 'nft-access'],
+          //amount: BigNumber.from(1),
+          cap: BigInt(100),
           //royaltyAttributes,
           preMint: true,
           nftContractAddress: sdk.nfts1155.nftContract.address,
           providers: [nodeAddress],
-          price: assetPrice,
+          //price: assetPrice,
         })    
         const ddo = await sdk.nfts1155.create(nftAttributes, accountWallet)    
         return ddo
@@ -86,7 +99,7 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
       }
 
     const onPublish = async () => {
-        try {
+        try {/*
             const assetPriceMap = new Map([[account.getId(), BigNumber.from(1)]])    
             const assetPrice = new AssetPrice(assetPriceMap)
             /*const royaltyAttributes = {
@@ -94,12 +107,12 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
                 scheme: getRoyaltyScheme(sdk, RoyaltyKind.Standard),
                 amount: 0,
             }*/    
-            const networkFee = await sdk.keeper.nvmConfig.getNetworkFee()
+            /*const networkFee = await sdk.keeper.nvmConfig.getNetworkFee()
             console.log(networkFee)
             const feeReceiver = await sdk.keeper.nvmConfig.getFeeReceiver()    
             assetPrice.addNetworkFees(feeReceiver, BigNumber.from(networkFee))
             assetPrice.setTokenAddress(ERC_TOKEN)
-    
+            */
             const metadata: MetaData = {
                 main: {
                     name: '',
@@ -116,14 +129,14 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
               dateCreated: new Date().toISOString(),
             },
           }
-          await loginMarketplace(sdk, account)
+          //await loginMarketplace(sdk, account)
 
       const response = await publishNFT1155(
         config.neverminedNodeAddress!,
         account,
         metadata,
         //royaltyAttributes,
-        assetPrice,
+        //assetPrice,
       )
 
       setDDO(response as DDO)
@@ -156,19 +169,22 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
                     <p className="text-gray-700">Experimental AI Model</p>
                 </div>
     
-                <div className="flex justify-between">                         
+                <div className="flex justify-between">                  
                     <UiLayout>
-                    {account ? (
-                        <>
-                            <button className="bg-blue-300 text-white px-4 py-2 rounded-md">Connected &nbsp;
+                    {isConnected ? (
+                        <>         
+                            <p className="text-blue-700">Connected to {address}</p>                                               
+                            <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => disconnect()}>Disconnect</button>
+                        
+                            {/*<button className="bg-blue-300 text-white px-4 py-2 rounded-md">Connected &nbsp;
                                 <UiText>{account.getId()}</UiText>
-                            </button>                            
+                            </button>*/}
                         </>
                     ) : (
-                            <button onClick={loginMetamask} className="bg-blue-500 text-white px-4 py-2 rounded-md">Connect</button>
+                            <button onClick={() => connect()} className="bg-blue-500 text-white px-4 py-2 rounded-md">Connect</button>
                     )}
-
-                    {walletAddress && !ddo.id && <PublishAsset onPublish={onPublish} />}
+                    {address && !ddo.id && <PublishAsset onPublish={onPublish} />}
+                    {/*{walletAddress && !ddo.id && <PublishAsset onPublish={onPublish} />}*/}
 
                     {/*{ddo?.id && (
                         <>

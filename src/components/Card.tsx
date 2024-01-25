@@ -5,9 +5,7 @@ import OtherCards from './CardComponents/OtherCards'
 
 const Card = ({ config }: { config: NeverminedOptions }) => {
     const router = useRouter()
-    const routeComponent = router.asPath
-    console.log(routeComponent)
-
+    const routeComponent = router.asPath    
   return (
     routeComponent === '/actions/publish-ai' ?  (
         <PublishAI config = {config} />

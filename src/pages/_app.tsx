@@ -1,6 +1,17 @@
 import '@/styles/globals.css'
-import type { AppProps } from 'next/app'
+import { AppProps } from 'next/app'
+import Providers from '../layout/Providers'
 
-export default function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+const App = ({ Component, pageProps, ...appProps }: AppProps) => {
+  return (
+    <div className="App">
+      <header className="App-header">
+        <Providers>
+          <Component {...pageProps}/>
+        </Providers>
+      </header>
+    </div>
+  )  
 }
+
+export default App;

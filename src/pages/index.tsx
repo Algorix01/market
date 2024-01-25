@@ -6,7 +6,8 @@ import Link from 'next/link';
 import Brand from '../components/Brand'
 import { Layout } from '@/components/Layout';
 
-const Home: React.FC = () => { 
+const Home: React.FC = () => {  
+
   
   const offerings = [
     {
@@ -52,9 +53,10 @@ const Home: React.FC = () => {
     router.push(`/offerings/${id}`)
   }
 
-  return (
-    
-      <Layout>
+  return (    
+    <div className="fixed top-0 flex w-full bg-gray-700 items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+      <div className="flex flex-col h-screen justify-between">
+        <Brand />
         <main className="flex flex-grow justify-center items-center p-16 mx-auto">
           <div className="p-4 grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
             {offerings.map((offering) => (
@@ -64,9 +66,8 @@ const Home: React.FC = () => {
             ))}
           </div>
         </main>
-      </Layout>
-    
-    
+      </div>
+    </div>
   )
 }
 

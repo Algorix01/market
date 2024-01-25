@@ -1,4 +1,4 @@
-import { Account, Nevermined, NeverminedOptions } from "@nevermined-io/catalog"
+import { Account, Nevermined, NeverminedOptions } from "@nevermined-io/sdk"
 import { UiLayout, UiText } from "@nevermined-io/styles"
 import { ethers } from "ethers"
 import { useEffect, useState } from "react"
