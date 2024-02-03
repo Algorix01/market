@@ -1,4 +1,4 @@
-import { Account, AssetPrice, DDO, MetaData, NFTAttributes, Nevermined, NeverminedOptions, RoyaltyAttributes, RoyaltyKind, getRoyaltyScheme } from "@nevermined-io/sdk"
+import { Account, AssetPrice, ContractHandler, DDO, MetaData, NFTAttributes, Nevermined, NeverminedOptions, RoyaltyAttributes, RoyaltyKind, getRoyaltyAttributes, getRoyaltyScheme } from "@nevermined-io/sdk"
 import { UiLayout, UiText } from "@nevermined-io/styles"
 import { BigNumber, ethers } from "ethers"
 import { useEffect, useState } from "react"
@@ -11,84 +11,60 @@ import { useSdkReadiness } from "@/hooks/sdkReadiness"
 const ERC_TOKEN = '0xe11a86849d99f524cac3e7a0ec1241828e332c62'
 
 const PublishAI = ({ config }: { config: NeverminedOptions }) => {
-    const [walletAddress, setWalletAddress] = useState('')
-    const [account, setAccount] = useState<Account>(undefined as unknown as Account)
+    const [account, setAccount] = useState<Account | undefined>(undefined)
     const [ddo, setDDO] = useState<DDO>({} as DDO)
-    //const [sdk, setSdk] = useState<Nevermined>({} as Nevermined)
-
     const { address, isConnected } = useAccount()
     const { connect } = useConnect({
         connector: new InjectedConnector(),
       })
     const { disconnect } = useDisconnect()
     const { sdk, isLoadingSDK } = useNevermined()
-    //const { isSdkReady} = useSdkReadiness()
 
-
-    /*const loginMetamask = async () => {
-        try {            
-            const response = await (window as any)?.ethereum?.request?.({
-                method: 'eth_requestAccounts',
-            }) as string[] | undefined;
-            if (response && response.length > 0) {
-                setWalletAddress(ethers.utils.getAddress(response[0]));
-            }
-        } catch (error) {
-            console.error('Error connecting to Metamask:', error);
-        }        
-    }*/
-
-    /*useEffect(() => {    
-        ;(window as any)?.ethereum?.on('accountsChanged', (newAccount: string[]) => {
-          if (newAccount && newAccount.length > 0) {
-            setWalletAddress(ethers.utils.getAddress(newAccount[0]))
-          } else {
-            setWalletAddress('')
-            console.log('No Account found!')
-          }
-        })
-    
-        ;(async () => {
-          const provider = new ethers.providers.Web3Provider((window as any).ethereum)
-          const accounts = await provider.listAccounts()
-          setWalletAddress(accounts?.length ? ethers.utils.getAddress(accounts[0]) : '')
-        })()
-    }, [])*/
-
-    /*useEffect(() => {
-        if (walletAddress) {
-          ;(async () => {
-            try {
-              const nvm = await Nevermined.getInstance(config)              
-              const accounts = await nvm.accounts.list()
-    
-              setAccount(accounts[0])
-              setSdk(nvm)
-            } catch (error) {
-              console.log(error)
-            }
-          })()
+      const initializeAccount = async (address: `0x${string}` | undefined) : Promise<Account|undefined> => {
+        if (!sdk || !address || isLoadingSDK) {
+          throw new Error(
+            `${!sdk ? "SDK instance is not initialized. " : ""}` +
+            `${!address ? "Wallet address is not available. " : ""}` +
+            `${isLoadingSDK ? "SDK is still loading." : ""}`
+          )
         }
-    }, [walletAddress])*/
-
+        try {
+          console.log(address as string)         
+          const accountObj = address as unknown as Account
+          return accountObj
+        } catch (error) {
+          console.error("Failed to fetch account from SDK:", error);
+          return undefined
+        }
+      };
+    
     const publishNFT1155 = async (
         nodeAddress: string,
         accountWallet: Account,
         metadata: MetaData,
-        //royaltyAttributes: RoyaltyAttributes,
-        //assetPrice: AssetPrice,
+        assetPrice: AssetPrice,
+        numberEditions: bigint
     ) => {
         const nftAttributes = NFTAttributes.getNFT1155Instance({
           metadata,
-          //serviceTypes: ['nft-sales', 'nft-access'],
-          //amount: BigNumber.from(1),
-          cap: BigInt(100),
-          //royaltyAttributes,
+          services: [{
+            serviceType: 'nft-sales',
+            price: assetPrice,
+            nft: {
+              amount: numberEditions,
+              nftTransfer: true
+            }
+          },
+          {
+            serviceType: 'nft-access',
+            nft: { amount: numberEditions },
+          }],
+          cap: BigInt(5),
           preMint: true,
-          nftContractAddress: sdk.nfts1155.nftContract.address,
+          nftContractAddress: '0x1bcA156f746C6Eb8b18d61654293e2Fc5b653fF5',
           providers: [nodeAddress],
-          //price: assetPrice,
         })    
+        console.log(accountWallet)      
         const ddo = await sdk.nfts1155.create(nftAttributes, accountWallet)    
         return ddo
     }
@@ -97,22 +73,13 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
         const clientAssertion = await sdk.utils.jwt.generateClientAssertion(account)
         await sdk.services.marketplace.login(clientAssertion)
       }
-
+    
     const onPublish = async () => {
-        try {/*
-            const assetPriceMap = new Map([[account.getId(), BigNumber.from(1)]])    
-            const assetPrice = new AssetPrice(assetPriceMap)
-            /*const royaltyAttributes = {
-                royaltyKind: RoyaltyKind.Standard,  
-                scheme: getRoyaltyScheme(sdk, RoyaltyKind.Standard),
-                amount: 0,
-            }*/    
-            /*const networkFee = await sdk.keeper.nvmConfig.getNetworkFee()
-            console.log(networkFee)
-            const feeReceiver = await sdk.keeper.nvmConfig.getFeeReceiver()    
-            assetPrice.addNetworkFees(feeReceiver, BigNumber.from(networkFee))
-            assetPrice.setTokenAddress(ERC_TOKEN)
-            */
+      if (!isConnected || !address) {
+        console.error('Wallet is not connected or address is unavailable');
+        return;
+      }
+        try {
             const metadata: MetaData = {
                 main: {
                     name: '',
@@ -129,16 +96,20 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
               dateCreated: new Date().toISOString(),
             },
           }
-          //await loginMarketplace(sdk, account)
 
+          let assetPrice: number = 19.99   
+          console.log(address)                                        
+          console.log(await initializeAccount(address))
+          const acc = await initializeAccount(address)
       const response = await publishNFT1155(
         config.neverminedNodeAddress!,
-        account,
+        acc!,
         metadata,
         //royaltyAttributes,
-        //assetPrice,
+        assetPrice as unknown as AssetPrice,
+        BigInt(1)
       )
-
+      console.log(response)
       setDDO(response as DDO)
     } catch (error) {
       console.log('error', error)
@@ -175,15 +146,12 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
                         <>         
                             <p className="text-blue-700">Connected to {address}</p>                                               
                             <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => disconnect()}>Disconnect</button>
-                        
-                            {/*<button className="bg-blue-300 text-white px-4 py-2 rounded-md">Connected &nbsp;
-                                <UiText>{account.getId()}</UiText>
-                            </button>*/}
                         </>
                     ) : (
                             <button onClick={() => connect()} className="bg-blue-500 text-white px-4 py-2 rounded-md">Connect</button>
                     )}
-                    {address && !ddo.id && <PublishAsset onPublish={onPublish} />}
+                    {isConnected && <PublishAsset onPublish={onPublish} />}
+                    {/*{address && !ddo.id && <PublishAsset onPublish={onPublish} />}*/}
                     {/*{walletAddress && !ddo.id && <PublishAsset onPublish={onPublish} />}*/}
 
                     {/*{ddo?.id && (
