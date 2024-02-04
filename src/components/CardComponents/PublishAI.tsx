@@ -18,17 +18,34 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
         connector: new InjectedConnector(),
       })
     const { disconnect } = useDisconnect()
-    const { sdk, isLoadingSDK } = useNevermined()
-    const { isSdkReady} = useSdkReadiness()
+    //const { sdk, isLoadingSDK } = useNevermined()
+    //const { isSdkReady} = useSdkReadiness()
+    const [sdk, setSdk] = useState<Nevermined | null>(null)
+    const [isSdkReady, setIsSdkReady] = useState<boolean>(false);
+
+    const initializeSDK = async () => {
+      try {
+        const neverminedInstance = await Nevermined.getInstance(config);
+        console.log(neverminedInstance)
+        setSdk(neverminedInstance)
+        setIsSdkReady(true);
+        console.log("SDK Initialized successfully");
+      } catch (error) {
+        console.error("Failed to initialize the SDK:", error);
+        setIsSdkReady(false);
+      }
+    }
+    useEffect(() => {        
+      initializeSDK();
+    }, []);
 
      const initializeAccount = async (address: `0x${string}` | undefined) : Promise<Account|undefined> => {
       console.log(isSdkReady)
-        if (!isSdkReady || !sdk || !address || isLoadingSDK) {
+        if (!isSdkReady || !sdk || !address ) {
           throw new Error(
             `${isSdkReady ? "SDK is not ready. " : ""}` +
             `${!sdk ? "SDK instance is not initialized. " : ""}` +
-            `${!address ? "Wallet address is not available. " : ""}` +
-            `${isLoadingSDK ? "SDK is still loading." : ""}`
+            `${!address ? "Wallet address is not available. " : ""}`            
           )
         }
         try {
@@ -49,6 +66,9 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
         assetPrice: AssetPrice,
         numberEditions: bigint
     ) => {
+        //if ( !sdk || !isSdkReady ) {
+          initializeSDK()
+        //}
         const nftAttributes = NFTAttributes.getNFT1155Instance({
           metadata,
           services: [{
@@ -70,6 +90,7 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
         })    
         console.log(accountWallet)      
         const ddo = await sdk.nfts1155.create(nftAttributes, accountWallet)    
+        console.log(ddo)
         return ddo
     }
 
