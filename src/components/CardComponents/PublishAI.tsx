@@ -67,7 +67,7 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
         numberEditions: bigint
     ) => {
         //if ( !sdk || !isSdkReady ) {
-          initializeSDK()
+          //await initializeSDK()
         //}
         const nftAttributes = NFTAttributes.getNFT1155Instance({
           metadata,
@@ -89,7 +89,8 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
           providers: [nodeAddress],
         })    
         console.log(accountWallet)      
-        const ddo = await sdk.nfts1155.create(nftAttributes, accountWallet)    
+        console.log(sdk)
+        const ddo = await sdk!.nfts1155.create(nftAttributes, accountWallet)    
         console.log(ddo)
         return ddo
     }
