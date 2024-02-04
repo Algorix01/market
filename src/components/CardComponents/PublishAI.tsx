@@ -19,10 +19,13 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
       })
     const { disconnect } = useDisconnect()
     const { sdk, isLoadingSDK } = useNevermined()
+    const { isSdkReady} = useSdkReadiness()
 
-      const initializeAccount = async (address: `0x${string}` | undefined) : Promise<Account|undefined> => {
-        if (!sdk || !address || isLoadingSDK) {
+     const initializeAccount = async (address: `0x${string}` | undefined) : Promise<Account|undefined> => {
+      console.log(isSdkReady)
+        if (!isSdkReady || !sdk || !address || isLoadingSDK) {
           throw new Error(
+            `${isSdkReady ? "SDK is not ready. " : ""}` +
             `${!sdk ? "SDK instance is not initialized. " : ""}` +
             `${!address ? "Wallet address is not available. " : ""}` +
             `${isLoadingSDK ? "SDK is still loading." : ""}`
@@ -30,7 +33,8 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
         }
         try {
           console.log(address as string)         
-          const accountObj = address as unknown as Account
+          //const accountObj = address as unknown as Account
+          const accountObj = sdk?.accounts?.getAccount(address as string)
           return accountObj
         } catch (error) {
           console.error("Failed to fetch account from SDK:", error);
