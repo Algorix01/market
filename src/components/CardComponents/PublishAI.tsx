@@ -66,9 +66,6 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
         assetPrice: AssetPrice,
         numberEditions: bigint
     ) => {
-        //if ( !sdk || !isSdkReady ) {
-          //await initializeSDK()
-        //}
         const nftAttributes = NFTAttributes.getNFT1155Instance({
           metadata,
           services: [{
@@ -90,6 +87,7 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
         })    
         console.log(accountWallet)      
         console.log(sdk)
+        //await sdk?.contracts.loadNft1155('0x1bcA156f746C6Eb8b18d61654293e2Fc5b653fF5')
         const ddo = await sdk!.nfts1155.create(nftAttributes, accountWallet)    
         console.log(ddo)
         return ddo
@@ -104,6 +102,9 @@ const PublishAI = ({ config }: { config: NeverminedOptions }) => {
       if (!isConnected || !address) {
         console.error('Wallet is not connected or address is unavailable');
         return;
+      }
+      if ( !sdk || !isSdkReady ) {
+          await initializeSDK()
       }
         try {
             const metadata: MetaData = {
